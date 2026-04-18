@@ -34,7 +34,7 @@ mini_hids_code/
 │── tests/                # Test files/logs
 
 # Clone the repository
-git clone https://github.com/your-username/mini-hids.git
+git clone https://github.com/prayansaraswat/HIDS.git
 
 # Navigate to project
 cd mini_hids_code
