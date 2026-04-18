@@ -1,65 +1,51 @@
-# HIDS
-A lightweight Python-based Host-Based Intrusion Detection System (HIDS) that monitors files, processes, system logs, and network activity to detect and alert on potential security threats in real time.
+# Mini Host-Based Intrusion Detection System (Mini HIDS)
 
-# Features
- File Integrity Monitoring
-Detects unauthorized file modifications using hashing
- Process Monitoring
-Identifies newly spawned or suspicious processes
-Brute-Force Detection
-Detects repeated failed SSH login attempts
- Network Monitoring
-Captures and analyzes network packets using Scapy
- Real-Time Alerts
-Displays alerts instantly in the terminal
+This is a lightweight educational Host-Based Intrusion Detection System implemented in Python.
+It demonstrates file integrity monitoring, log monitoring, process monitoring and optional network sniffing.
 
-Tech Stack
-Language: Python
-OS: Linux (Arch recommended)
-Libraries:
-psutil – process monitoring
-hashlib – file integrity
-scapy – network sniffing
-python-dotenv – configuration handling
+**Safe demo:** Only `tests/testfile.txt` is monitored by default so you can safely test file-change detection.
 
-mini_hids_code/
-│── monitor.py            # Main entry point
-│── file_monitor.py       # File integrity module
-│── process_monitor.py    # Process monitoring module
-│── log_monitor.py        # Brute-force detection
-│── net_monitor.py        # Network monitoring
-│── alert.py              # Alert system
-│── config.env            # Configuration file
-│── requirements.txt      # Dependencies
-│── tests/                # Test files/logs
+## Running (safe demo)
+1. Create a virtualenv and install requirements (scapy optional):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+   If you don't want to install scapy, set `USE_SCAPY=0` in `config.env` (default).
 
-# Clone the repository
-git clone https://github.com/prayansaraswat/HIDS.git
+2. Configure (optional) `config.env` for email alerts (not required for demo).
 
-# Navigate to project
-cd mini_hids_code
+3. Create baseline (already created for demo):
+   ```bash
+   python file_integrity.py --init
+   ```
+   (This will update baseline.json if run.)
 
-# Create virtual environment
-python -m venv venv
+4. Start the orchestrator (runs file, process, and log monitors):
+   ```bash
+   python monitor.py
+   ```
 
-# Activate it
-source venv/bin/activate
+5. Trigger tests:
+   - File change: edit `tests/testfile.txt` and save — watch for alert in console and `hids.log`.
+   - Log monitor: append lines to `tests/auth_test.log` similar to SSH failures to trigger brute-force alert:
+     ```bash
+     echo "Failed password for invalid user test" >> tests/auth_test.log
+     ```
+   - Process monitor: start an unusual process (e.g. `python -c "import time; time.sleep(300)"`) not in whitelist to trigger alert.
 
-# Install dependencies
-pip install -r requirements.txt
+## Files
+- `alert.py` — unified alerting (console + rotating file + optional email)
+- `file_integrity.py` — create baseline and compute hashes
+- `file_monitor.py` — periodic file integrity checks
+- `process_monitor.py` — detects new/unknown processes vs whitelist
+- `log_monitor.py` — tails and analyzes a log file (safe demo uses `tests/auth_test.log`)
+- `net_monitor.py` — optional scapy-based sniffer (disabled by default)
+- `monitor.py` — orchestrator to run monitors concurrently
+- `baseline.json`, `whitelist.json`, `config.env` — config files
+- `tests/` — contains `testfile.txt` and `auth_test.log` for safe testing
 
-# Run Full HIDS
-sudo $(which python) monitor.py
-
-# Brute-force detection
-ssh wronguser@localhost
-
-# File monitoring
-echo "test" >> tests/testfile.txt
-
-# Process monitoring
-sleep 60 &
-
-# Network monitoring
-ping 8.8.8.8
-
+## Notes
+- Do **not** run packet sniffing on networks you don't own; scapy requires root privileges.
+- Use this project for educational/demo purposes only.
