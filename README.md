@@ -1,51 +1,134 @@
-# Mini Host-Based Intrusion Detection System (Mini HIDS)
+#  Mini Host-Based Intrusion Detection System (HIDS)
 
-This is a lightweight educational Host-Based Intrusion Detection System implemented in Python.
-It demonstrates file integrity monitoring, log monitoring, process monitoring and optional network sniffing.
+A lightweight **educational HIDS built in Python** that monitors system activity to detect potential security threats such as file tampering, brute-force login attempts, suspicious processes, and optional network activity.
 
-**Safe demo:** Only `tests/testfile.txt` is monitored by default so you can safely test file-change detection.
+---
 
-## Running (safe demo)
-1. Create a virtualenv and install requirements (scapy optional):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-   If you don't want to install scapy, set `USE_SCAPY=0` in `config.env` (default).
+##  Features
 
-2. Configure (optional) `config.env` for email alerts (not required for demo).
+*  File Integrity Monitoring (hash-based)
+*  Process Monitoring (whitelist-based detection)
+*  Brute-force Detection (log analysis)
+*  Network Monitoring (Scapy-based, optional)
+*  Real-time Alerts (console + log file)
 
-3. Create baseline (already created for demo):
-   ```bash
-   python file_integrity.py --init
-   ```
-   (This will update baseline.json if run.)
+---
 
-4. Start the orchestrator (runs file, process, and log monitors):
-   ```bash
-   python monitor.py
-   ```
+##  Safe Demo Environment
 
-5. Trigger tests:
-   - File change: edit `tests/testfile.txt` and save — watch for alert in console and `hids.log`.
-   - Log monitor: append lines to `tests/auth_test.log` similar to SSH failures to trigger brute-force alert:
-     ```bash
-     echo "Failed password for invalid user test" >> tests/auth_test.log
-     ```
-   - Process monitor: start an unusual process (e.g. `python -c "import time; time.sleep(300)"`) not in whitelist to trigger alert.
+This project includes a **safe testing setup**:
 
-## Files
-- `alert.py` — unified alerting (console + rotating file + optional email)
-- `file_integrity.py` — create baseline and compute hashes
-- `file_monitor.py` — periodic file integrity checks
-- `process_monitor.py` — detects new/unknown processes vs whitelist
-- `log_monitor.py` — tails and analyzes a log file (safe demo uses `tests/auth_test.log`)
-- `net_monitor.py` — optional scapy-based sniffer (disabled by default)
-- `monitor.py` — orchestrator to run monitors concurrently
-- `baseline.json`, `whitelist.json`, `config.env` — config files
-- `tests/` — contains `testfile.txt` and `auth_test.log` for safe testing
+* Only `tests/testfile.txt` is monitored for file changes
+* Log monitoring uses `tests/auth_test.log`
+* No real system files are modified
 
-## Notes
-- Do **not** run packet sniffing on networks you don't own; scapy requires root privileges.
-- Use this project for educational/demo purposes only.
+---
+
+##  Installation
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+ Optional: Disable network monitoring if Scapy not installed
+Set in `config.env`:
+
+```
+USE_SCAPY=0
+```
+
+---
+
+##  Running the Project
+
+### 1. Create baseline
+
+```bash
+python file_integrity.py --init
+```
+
+### 2. Start all monitors
+
+```bash
+python monitor.py
+```
+
+---
+
+##  Testing Features
+
+###  File Integrity
+
+```bash
+echo "test" >> tests/testfile.txt
+```
+
+---
+
+###  Brute-force Detection
+
+```bash
+echo "Failed password for invalid user test" >> tests/auth_test.log
+```
+
+---
+
+###  Process Monitoring
+
+```bash
+python -c "import time; time.sleep(300)"
+```
+
+---
+
+###  Network Monitoring (optional)
+
+```bash
+sudo $(which python) monitor.py
+```
+
+---
+
+##  Project Structure
+
+```
+mini_hids_code/
+│── monitor.py            # Main orchestrator
+│── file_monitor.py       # File monitoring
+│── process_monitor.py    # Process monitoring
+│── log_monitor.py        # Log analysis
+│── net_monitor.py        # Network sniffing
+│── alert.py              # Alert system
+│── baseline.json         # File hashes
+│── whitelist.json        # Allowed processes
+│── config.env            # Configuration
+│── tests/                # Safe demo files
+```
+
+---
+
+##  Notes
+
+* Network monitoring requires **root privileges**
+* Do not use packet sniffing on unauthorized networks
+* Designed for educational use and security research; can be extended for real-world monitoring scenarios.
+---
+
+##  Impact
+
+Provides **real-time detection of system-level security threats** and demonstrates how HIDS works in practice.
+
+---
+
+##  Tech Stack
+
+* Python
+* psutil
+* hashlib
+* scapy (optional)
+* python-dotenv
+
+---
+
